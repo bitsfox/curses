@@ -7,8 +7,8 @@
 #define		RIGHT			3
 #define		star			'*'
 #define		nul				' '
-#define		num				100
-
+#define		num				10000
+#define		tim				7000
 
 struct POS
 {
@@ -47,7 +47,7 @@ void pump(int i)
 {
 	struct timeval tm;
 	tm.tv_sec=0;
-	tm.tv_usec=i*100000;
+	tm.tv_usec=i*tim;
 	select(0,NULL,NULL,NULL,&tm);
 }//}}}
 //{{{ int	 initdata()
@@ -78,7 +78,7 @@ int	 initdata()
 	echochar(sc[j][i]);
 	move(0,3);
 	printw("times: ");
-	move(0,COLS/2);
+	move(0,COLS/2-6);
 	printw("hello world");
 	move(1,0);
 	for(i=0;i<COLS;i++)
@@ -120,7 +120,7 @@ int  get_dir()
 				case DOWN://
 					i=p[head].y+1;
 					j=p[head].x;
-					if(i>LINES)
+					if(i>=LINES)
 						return 1;
 					if(sc[i][j]==star)
 						return 1;
@@ -228,6 +228,7 @@ void goon()
 {
 	static int aa=0;
 	int i,j,k,m,n;
+	k=0;
 	while(1)
 	{
 		i=get_dir();
@@ -242,7 +243,7 @@ void goon()
 				while(1)//这是一种非常简单的逻辑实现，不能实现诸如：_|-|_之类的路线。
 				{
 					j=head;j++;
-					if(j>=100)
+					if(j>=num)
 						j=0;
 					m=p[head].x;
 					n=p[head].y-1;
@@ -259,6 +260,8 @@ void goon()
 					if(aa>6)
 					{
 						aa=0;
+						move(0,3);
+						printw("times: %d",++k);
 					}
 					else
 					{
@@ -266,7 +269,7 @@ void goon()
 						n=p[tail].y;
 						sc[n][m]=nul;
 						tail++;
-						if(tail>=100)
+						if(tail>=num)
 							tail=0;
 						move(n,m);
 						echochar(sc[n][m]);
@@ -279,11 +282,11 @@ void goon()
 				while(1)
 				{
 					j=head;j++;
-					if(j>=100)
+					if(j>=num)
 						j=0;
 					m=p[head].x;
 					n=p[head].y+1;
-					if(n>LINES)
+					if(n>=LINES)
 						break;
 					if(sc[n][m]==star)
 						break;
@@ -293,14 +296,18 @@ void goon()
 					echochar(sc[n][m]);
 					head=j;aa++;
 					if(aa>6)
+					{
 						aa=0;
+						move(0,3);
+						printw("times: %d",++k);
+					}
 					else
 					{
 						m=p[tail].x;
 						n=p[tail].y;
 						sc[n][m]=nul;
 						tail++;
-						if(tail>=100)
+						if(tail>=num)
 							tail=0;
 						move(n,m);
 						echochar(sc[n][m]);
@@ -313,7 +320,7 @@ void goon()
 				while(1)
 				{
 					j=head;j++;
-					if(j>=100)
+					if(j>=num)
 						j=0;
 					m=p[head].x-1;
 					n=p[head].y;
@@ -328,14 +335,18 @@ void goon()
 					echochar(sc[n][m]);
 					aa++;
 					if(aa>6)
+					{
 						aa=0;
+						move(0,3);
+						printw("times: %d",++k);
+					}
 					else
 					{
 						m=p[tail].x;
 						n=p[tail].y;
 						sc[n][m]=nul;
 						tail++;
-						if(tail>=100)
+						if(tail>=num)
 							tail=0;
 						move(n,m);
 						echochar(sc[n][m]);
@@ -348,7 +359,7 @@ void goon()
 				while(1)
 				{
 					j=head+1;
-					if(j>=100)
+					if(j>=num)
 						j=0;
 					m=p[head].x+1;
 					n=p[head].y;
@@ -363,14 +374,18 @@ void goon()
 					echochar(sc[n][m]);
 					aa++;
 					if(aa>6)
+					{
 						aa=0;
+						move(0,3);
+						printw("times: %d",++k);
+					}
 					else
 					{
 						m=p[tail].x;
 						n=p[tail].y;
 						sc[n][m]=nul;
 						tail++;
-						if(tail>=100)
+						if(tail>=num)
 							tail=0;
 						move(n,m);
 						echochar(sc[n][m]);
