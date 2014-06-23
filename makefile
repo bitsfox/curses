@@ -1,2 +1,2 @@
-s02:s02.c
-	gcc -o s02 s02.c -I/workarea/cprogram/include/ -lncurses
+s05:s05.c
+	gcc -o s05 s05.c -I/workarea/cprogram/include/ -lncurses
