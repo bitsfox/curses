@@ -78,8 +78,10 @@ int	 initdata()
 	echochar(sc[j][i]);
 	move(0,3);
 	printw("times: ");
-	move(0,COLS/2-6);
-	printw("hello world");
+	move(0,COLS/2-14);
+	printw("your best scores:");
+	move(0,COLS-10);
+	printw("%d*%d",LINES,COLS);
 	move(1,0);
 	for(i=0;i<COLS;i++)
 		addstr("-");
