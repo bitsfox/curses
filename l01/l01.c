@@ -14,7 +14,7 @@
 #define		shu			'|'
 #define 	heng		'-'
 #define		timz		200000
-#define		seed_num	300
+#define		seed_num	XX*YY/10
 char a[YY][XX],b[YY][XX];
 
 
