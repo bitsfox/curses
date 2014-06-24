@@ -7,14 +7,14 @@
 #include"clsscr.h"
 #include<curses.h>
 
-#define		XX			60
-#define		YY			30
+#define		XX			100
+#define		YY			40
 #define		nul			' '
 #define		star		'*'
 #define		shu			'|'
 #define 	heng		'-'
 #define		timz		200000
-
+#define		seed_num	300
 char a[YY][XX],b[YY][XX];
 
 
@@ -69,11 +69,11 @@ void seed()
 			b[i][j]=nul;
 		}
 	}
-	i=rand()%100+100;
+	i=rand()%seed_num+seed_num;
 	for(j=0;j<i;j++)
 	{
-		k=rand()%1800;
-		m=k/60;n=k%60;
+		k=rand()%(XX*YY);
+		m=k/XX;n=k%XX;
 		a[m][n]=star;
 	}
 }//}}}
