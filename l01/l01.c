@@ -1,9 +1,6 @@
 /*二维细胞生成机代码
- 
- 				Author:tybitsfox	2014-6-24
-
+ 	Author:tybitsfox	2014-6-24
  */
-
 #include"clsscr.h"
 #include<curses.h>
 
@@ -16,7 +13,7 @@
 #define		timz		200000
 #define		seed_num	XX*YY/10
 char a[YY][XX],b[YY][XX];
-
+int  flag=0;
 
 //{{{ void pump()
 void pump()
@@ -30,16 +27,19 @@ void pump()
 int initdata()
 {
 	int i,j,k;
-	for(i=0;i<XX;i++)
+	if(flag!=2)
 	{
-		for(j=0;j<YY;j++)
+		for(i=0;i<XX;i++)
 		{
-			a[j][i]=nul;
-			b[j][i]=nul;
+			for(j=0;j<YY;j++)
+			{
+				a[j][i]=nul;
+				b[j][i]=nul;
+			}
 		}
 	}
 	srand(time(0));
-	for(j=2;j<=YY+3;j++)
+	for(j=0;j<=YY+1;j++)
 	{
 		move(j,9);
 		echochar(shu);
@@ -49,9 +49,9 @@ int initdata()
 	}
 	for(i=10;i<XX+10;i++)
 	{
-		move(2,i);
+		move(0,i);
 		echochar(heng);
-		move(YY+3,i);
+		move(YY+1,i);
 		echochar(heng);
 		refresh();
 	}
@@ -61,6 +61,7 @@ int initdata()
 void seed()
 {
 	int i,j,k,m,n;
+	char *c,name[128];
 	for(i=0;i<YY;i++)
 	{
 		for(j=0;j<XX;j++)
@@ -76,19 +77,89 @@ void seed()
 		m=k/XX;n=k%XX;
 		a[m][n]=star;
 	}
+	if(flag==0)//save
+	{
+		c=&a[0][0];
+		memset(name,0,sizeof(name));
+		snprintf(name,sizeof(name),"%ld.sav",time(0));
+		k=open(name,O_CREAT|O_RDWR,0644);
+		if(k<=0)
+			return;
+		i=XX;j=YY;
+		write(k,(void*)&i,4);
+		write(k,(void*)&j,4);
+		write(k,c,i*j);
+		close(k);
+	}
 }//}}}
 int goon();
 
 //{{{ int main(int argc,char **argv)
 int main(int argc,char **argv)
 {
-	int i,j,k;
+	int i,j,k,l;
+	char *c;
+	if(argc==2)
+	{
+		if(memcmp(argv[1],"--nosave",sizeof("--nosave"))==0)
+			flag=1;
+		else
+		{
+			if(memcmp(argv[1],"--help",sizeof("--help"))==0) //show help
+			{
+				printf("HELP\n");
+				return 0;
+			}//add another para~~~
+		}
+	}
+	if(argc==3)
+	{
+		if(memcmp(argv[1],"-f",sizeof("-f"))==0)
+		{
+			flag=2;
+			k=open(argv[2],O_RDONLY);
+			if(k<=0)
+			{
+				printf("can't open file %s\n",argv[2]);
+				return 0;
+			}
+			l=read(k,(void*)&i,4);
+			if(l!=4)
+			{
+				close(k);
+				printf("read error no1\n");
+				return 0;
+			}
+			l=read(k,(void*)&j,4);
+			if(l!=4)
+			{
+				close(k);
+				printf("read error no2\n");
+				return 0;
+			}
+			if(i!=XX || j!=YY)
+			{
+				close(k);
+				printf("file data error\n");
+				return 0;
+			}
+			c=&a[0][0];
+			memset(c,0,XX*YY);
+			l=read(k,c,i*j);
+			close(k);
+			if(l!=i*j)
+			{
+				printf("read error no3\n");
+				return 0;
+			}
+		}
+	}
 	initscr();
 	cbreak();
 	noecho();
 	curs_set(0);
 	keypad(stdscr,true);
-	if(COLS<=XX || LINES<=YY)
+	if(COLS<=XX || LINES<=(YY-2))
 	{
 		move(LINES/2,COLS/2-10);
 		printw("window size is to small");
@@ -96,17 +167,7 @@ int main(int argc,char **argv)
 		goto end_01;
 	}
 	initdata();
-	//seed();
-	goon();/*
-	for(i=0;i<XX;i++)
-	{
-		for(j=0;j<YY;j++)
-		{
-			move(j+3,i+10);
-			echochar(a[j][i]);
-		}
-	}
-	refresh();*/
+	goon();
 end_01:	
 	k=getchar();
 	endwin();
@@ -120,7 +181,8 @@ int goon()
 	char *c1,*c,ch;
 	c=&b[0][0];
 	c1=&a[0][0];
-	seed();
+	if(flag!=2)
+		seed();
 	while(1)
 	{
 		memset(c,nul,XX*YY);
@@ -180,7 +242,7 @@ int goon()
 		{
 			for(j=0;j<YY;j++)
 			{
-				move(j+3,i+10);
+				move(j+1,i+10);
 				echochar(b[j][i]);
 			}
 		}
@@ -191,6 +253,7 @@ int goon()
 	}
 	return 0;
 }//}}}
+
 
 
 
