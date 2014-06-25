@@ -267,12 +267,14 @@ int goon()
 		}
 		if(n>2)
 			rep++;
+		else
+			rep=0;
 		ev_counts++;
 		move(4,XX+15);
 		printw("ev_counts: %04d",ev_counts);
 		move(6,XX+15);
 		printw("lv_counts: %04d",lv_counts);
-		if(rep>20)
+		if(rep>60)
 		{
 			move(8,XX+15);
 			printw("finished evolution!");
