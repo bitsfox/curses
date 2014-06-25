@@ -14,6 +14,11 @@
 #define		seed_num	XX*YY/10
 char a[YY][XX],b[YY][XX];
 int  flag=0;
+int	 ev_counts=0;			//进化次数
+int	 lv_counts=0;			//生存数量
+int  rep=0;					//重复次数。
+int  lst[10]={0};			//最后10次的生存数量
+int  head;					//list的头指针
 
 //{{{ void pump()
 void pump()
@@ -38,6 +43,8 @@ int initdata()
 			}
 		}
 	}
+	ev_counts=lv_counts=0;
+	rep=0;head=0;
 	srand(time(0));
 	for(j=0;j<=YY+1;j++)
 	{
@@ -238,13 +245,41 @@ int goon()
 				}
 			}
 		}
+		lv_counts=0;
 		for(i=0;i<XX;i++)
 		{
 			for(j=0;j<YY;j++)
 			{
 				move(j+1,i+10);
 				echochar(b[j][i]);
+				if(b[j][i]==star)
+					lv_counts++;
 			}
+		}
+		lst[head++]=lv_counts;
+		if(head>=10)
+			head=0;
+		n=0;
+		for(m=0;m<10;m++)
+		{
+			if(lst[m]==lv_counts)
+				n++;
+		}
+		if(n>2)
+			rep++;
+		ev_counts++;
+		move(4,XX+15);
+		printw("ev_counts: %04d",ev_counts);
+		move(6,XX+15);
+		printw("lv_counts: %04d",lv_counts);
+		if(rep>20)
+		{
+			move(8,XX+15);
+			printw("finished evolution!");
+			move(10,XX+15);
+			printw("press any key to exit..");
+			refresh();
+			break;
 		}
 		refresh();
 		pump();
