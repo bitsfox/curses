@@ -60,9 +60,11 @@ void onbnt1(GtkWidget *widget,gpointer gp)
 		if(ws.thread_lock==0)
 			return;
 		ws.thread_lock=0;
-		pump();
-		pump();
+		lv_counts=0;
+		bg_counts=0;
+		ev_counts=0;
 		gtk_button_set_label(GTK_BUTTON(widget),"开始");
+		pump();
 		return;
 	}
 	//gtk_widget_queue_draw((GtkWidget*)gp);
@@ -71,35 +73,70 @@ void onbnt1(GtkWidget *widget,gpointer gp)
 gboolean on_drawing(GtkWidget *widget,GdkEventExpose *event,gpointer gp)
 {
 	int i,j,k;
-	char ch[10];
-	memset(ch,0,10);
+	char ch[100];
+	memset(ch,0,100);
 	ch[0]='*';
-	cairo_t *cr,*ct;
+	cairo_t *cr,*ct,*cm,*cn;
 	ct=gdk_cairo_create(widget->window);
 	cairo_set_source_rgb(ct,0,0,1);
 	cairo_set_line_width(ct,0.5);
 	cairo_set_font_size(ct,10);
 	cr=gdk_cairo_create(widget->window);
-	cairo_set_source_rgb(cr,0.85,0.85,0.85);
+	cairo_set_source_rgb(cr,1,1,1);
 	cairo_set_line_width(cr,0.5);
 	cairo_set_font_size(cr,10);
-	cairo_rectangle(cr,0,0,da_w,da_h);
+	cm=gdk_cairo_create(widget->window);
+	cairo_set_source_rgb(cm,0.85,0.85,0.85);
+	cairo_set_line_width(cm,0.2);
+	cairo_set_font_size(cm,10);
+	cn=gdk_cairo_create(widget->window);
+	cairo_set_source_rgb(cn,1,0,0);
+	cairo_set_line_width(cn,0.5);
+	cairo_set_font_size(cn,10);
+	//cairo_rectangle(cr,0,0,da_w,da_h);
+	cairo_rectangle(cr,0,0,XX*7,YY*7);
 	cairo_fill(cr);
+	cairo_rectangle(cm,0,YY*7+1,da_w,(da_h-YY*7-1));
+	cairo_fill(cm);
+	//cairo_move_to(ct,28,28);
+	//snprintf(ch,100,"XX= %d YY= %d da_w=%d da_h=%d",XX,YY,da_w,da_h);
+	//cairo_show_text(ct,ch);
 	for(i=0;i<XX;i++)
 	{
 		for(j=0;j<YY;j++)
 		{
 			if(b[j][i]==star)
 			{
-				cairo_move_to(ct,i*7,j*7);
+				cairo_move_to(ct,i*7,j*7+7);
 				cairo_show_text(ct,ch);
 			}
 		}
 	}
+	cairo_move_to(ct,dp_x,dp_y);
+	cairo_line_to(ct,dp_x,dp_my);
+	cairo_move_to(ct,dp_x,dp_y);
+	cairo_line_to(ct,dp_mx,dp_y);
+	cairo_move_to(ct,0,lvv[0]);
+	k=dp_my-dp_y;
+	for(i=1;i<200;i++)
+	{
+		if(lvv[i]==0)
+			break;
+		cairo_line_to(ct,i*3,lvv[i]);
+	}
+
+	cairo_move_to(cn,0,da_h-10);
+	memset(ch,0,sizeof(ch));
+	snprintf(ch,100,"初始生命数：%d 进化次数：%d 当前生命数：%d",bg_counts,ev_counts,lv_counts);
+	cairo_show_text(cn,ch);
 	cairo_stroke(ct);
 	cairo_destroy(ct);
 	cairo_stroke(cr);
 	cairo_destroy(cr);
+	cairo_stroke(cm);
+	cairo_destroy(cm);
+	cairo_stroke(cn);
+	cairo_destroy(cn);
 	return FALSE;
 }//}}}
 
@@ -164,6 +201,7 @@ void seed()
 		}
 	}
 	i=rand()%seed_num+seed_num;
+	bg_counts=i;
 	for(j=0;j<i;j++)
 	{
 		k=rand()%(XX*YY);
@@ -193,6 +231,11 @@ gpointer goon(gpointer gp)
 	char *c1,*c,ch;
 	c=&b[0][0];
 	c1=&a[0][0];
+	v1=0;v2=0;
+	for(i=0;i<150;i++)
+	{
+		lvv[i]=0;
+	}
 	if(flag!=2)
 		seed();
 	while(1)
@@ -250,17 +293,15 @@ gpointer goon(gpointer gp)
 				}
 			}
 		}
-		lv_counts=0;/*
+		lv_counts=0;
 		for(i=0;i<XX;i++)
 		{
 			for(j=0;j<YY;j++)
 			{
-				move(j+1,i+10);
-				echochar(b[j][i]);
 				if(b[j][i]==star)
 					lv_counts++;
 			}
-		}*//*
+		}
 		lst[head++]=lv_counts;
 		if(head>=10)
 			head=0;
@@ -275,11 +316,20 @@ gpointer goon(gpointer gp)
 		else
 			rep=0;
 		ev_counts++;
-		move(4,XX+15);
-		printw("ev_counts: %04d",ev_counts);
-		move(6,XX+15);
-		printw("lv_counts: %04d",lv_counts);
-		if(rep>60)
+		v1++;
+		if(v1>=10)
+		{
+			v1=0;
+			if(v2<200)
+			{
+				i=bg_counts-lv_counts;
+				j=dp_y-dp_my;
+				k=i*j/bg_counts+dp_my;
+				lvv[v2++]=k;
+			//	lvv[v2++]=bg_counts-lv_counts;
+			}
+		}
+		/*if(rep>60)
 		{
 			move(8,XX+15);
 			printw("finished evolution!");
@@ -287,8 +337,7 @@ gpointer goon(gpointer gp)
 			printw("press any key to exit..");
 			refresh();
 			break;
-		}
-		refresh();*/
+		}*/
 		gdk_threads_enter();
 		gtk_widget_queue_draw(ws.darea);
 		gdk_threads_leave();
